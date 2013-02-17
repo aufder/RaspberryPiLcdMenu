@@ -13,6 +13,7 @@ different options.  XML element support includes:
 - folders, for organizing menus.
 - widgets, which are really just functions to call in the code.
 - run, which allows you to run any command and see the output on the LCD.
+
 It assumes the user has the LCD Plate from Adafruit already attached.  It is also
 possible to make a quick modification to the LCD libraries to detect if the LCD
 is attached before progressing into the app.
