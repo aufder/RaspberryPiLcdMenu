@@ -1,0 +1,54 @@
+<application>
+  <folder text="System Info">
+    <widget text="Show Date/Time" function="ShowDateTime" />
+    <widget text="Set Date/Time" function="SetDateTime" />
+    <folder text="Network">
+      <widget text="IP Address" function="ShowIPAddress" />
+      <widget text="Use 10.1.1.2" function="Use10Network" />
+      <widget text="Use DHCP" function="UseDHCP" />
+    </folder>
+    <folder text="Location">
+      <widget text="Show Lat/Lon" function="ShowLatLon" />
+      <widget text="Set Lat/Lon" function="SetLatLon" />
+      <widget text="Set Location" function="SetLocation" />
+    </folder>
+    <folder text="LCD Color">
+      <widget text="Red" function="LcdRed" />
+      <widget text="Green" function="LcdGreen" />
+      <widget text="Blue" function="LcdBlue" />
+      <widget text="Yellow" function="LcdYellow" />
+      <widget text="Teal" function="LcdTeal" />
+      <widget text="Violet" function="LcdViolet" />
+      <widget text="White" function="LcdOn" />
+      <widget text="Off" function="LcdOff" />
+    </folder>
+    <run text="Run ls">ls</run>
+  </folder>
+  <folder text="Sensors">
+    <folder text="Compass/Gyro">
+      <widget text="View Accelerate" function="CompassGyroViewAcc" />
+      <widget text="View Magnetics" function="CompassGyroViewMag" />
+      <widget text="View Heading" function="CompassGyroViewHeading" />
+      <widget text="View Temp" function="CompassGyroViewTemp" />
+      <widget text="Calibrate" function="CompassGyroCalibrate" />
+      <widget text="Calibrate Clear" function="CompassGyroCalibrateClear" />
+    </folder>
+    <folder text="Temp/Baro">
+      <widget text="View Info" function="TempBaroView" />
+      <widget text="Calibrate" function="TempBaroCalibrate" />
+    </folder>
+  </folder>
+  <folder text="Astronomy">
+    <widget text="Alt/Az, RA/Decl" function="AstroViewAll" />
+    <widget text="Alt/Az" function="AstroViewAltAz" />
+    <widget text="RA/Decl" function="AstroViewRADecl" />
+  </folder>
+  <folder text="Camera">
+    <widget text="Detect" function="CameraDetect" />
+    <widget text="Take Picture" function="CameraTakePicture" />
+    <widget text="Time Lapse" function="CameraTimeLapse" />
+  </folder>
+  <widget text="Quit" function="DoQuit" />
+  <widget text="Shutdown" function="DoShutdown" />
+</application>
+
