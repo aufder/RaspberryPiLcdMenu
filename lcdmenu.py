@@ -247,19 +247,42 @@ class Folder:
         self.items = []
         self.parent = myParent
 
+def HandleSettings(node):
+    global lcd
+    if node.getAttribute('lcdColor').lower() == 'red':
+        lcd.backlight(lcd.RED)
+    elif node.getAttribute('lcdColor').lower() == 'green':
+        lcd.backlight(lcd.GREEN)
+    elif node.getAttribute('lcdColor').lower() == 'blue':
+        lcd.backlight(lcd.BLUE)
+    elif node.getAttribute('lcdColor').lower() == 'yellow':
+        lcd.backlight(lcd.YELLOW)
+    elif node.getAttribute('lcdColor').lower() == 'teal':
+        lcd.backlight(lcd.TEAL)
+    elif node.getAttribute('lcdColor').lower() == 'violet':
+        lcd.backlight(lcd.VIOLET)
+    elif node.getAttribute('lcdColor').lower() == 'white':
+        lcd.backlight(lcd.ON)
+    if node.getAttribute('lcdBacklight').lower() == 'on':
+        lcd.backlight(lcd.ON)
+    elif node.getAttribute('lcdBacklight').lower() == 'off':
+        lcd.backlight(lcd.OFF)
+
 def ProcessNode(currentNode, currentItem):
     children = currentNode.childNodes
 
     for child in children:
         if isinstance(child, xml.dom.minidom.Element):
-            if child.tagName == 'folder':
+            if child.tagName == 'settings':
+                HandleSettings(child)
+            elif child.tagName == 'folder':
                 thisFolder = Folder(child.getAttribute('text'), currentItem)
                 currentItem.items.append(thisFolder)
                 ProcessNode(child, thisFolder)
-            if child.tagName == 'widget':
+            elif child.tagName == 'widget':
                 thisWidget = Widget(child.getAttribute('text'), child.getAttribute('function'))
                 currentItem.items.append(thisWidget)
-            if child.tagName == 'run':
+            elif child.tagName == 'run':
                 thisCommand = CommandToRun(child.getAttribute('text'), child.firstChild.data)
                 currentItem.items.append(thisCommand)
 
