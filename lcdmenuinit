@@ -5,7 +5,7 @@ case "$1" in
   start)
     echo "Starting lcdmenu"
     cd /home/pi/lcdmenu
-    sudo /usr/bin/python /home/pi/lcdmenu/lcdmenu.py
+    sudo /usr/bin/python /home/pi/lcdmenu/lcdmenu.py &
   ;;
   stop)
     echo "Stopping lcdmenu"
