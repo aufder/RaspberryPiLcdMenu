@@ -6,6 +6,7 @@
 # from Adafruit Electronics.
 
 import commands
+import os
 from string import split
 from time import sleep, strftime, localtime
 from xml.dom.minidom import *
@@ -57,6 +58,19 @@ def DoShutdown():
             quit()
         sleep(0.25)
 
+def DoReboot():
+    lcd.clear()
+    lcd.message('Are you sure?\nPress Sel for Y')
+    while 1:
+        if lcd.buttonPressed(lcd.LEFT):
+            break
+        if lcd.buttonPressed(lcd.SELECT):
+            lcd.clear()
+            lcd.backlight(lcd.OFF)
+            commands.getoutput("sudo reboot")
+            quit()
+        sleep(0.25)
+
 def LcdOff():
     lcd.backlight(lcd.OFF)
 
@@ -90,9 +104,100 @@ def ShowDateTime():
         lcd.home()
         lcd.message(strftime('%a %b %d %Y\n%I:%M:%S %p', localtime()))
     
+def ValidateDateDigit(current, curval):
+    # do validation/wrapping
+    if current == 0: # Mm
+        if curval < 1:
+            curval = 12
+        elif curval > 12:
+            curval = 1
+    elif current == 1: #Dd
+        if curval < 1:
+            curval = 31
+        elif curval > 31:
+            curval = 1
+    elif current == 2: #Yy
+        if curval < 1950:
+            curval = 2050
+        elif curval > 2050:
+            curval = 1950
+    elif current == 3: #Hh
+        if curval < 0:
+            curval = 23
+        elif curval > 23:
+            curval = 0
+    elif current == 4: #Mm
+        if curval < 0:
+            curval = 59
+        elif curval > 59:
+            curval = 0
+    elif current == 5: #Ss
+        if curval < 0:
+            curval = 59
+        elif curval > 59:
+            curval = 0
+    return curval
+
 def SetDateTime():
     if DEBUG:
         print('in SetDateTime')
+    # M D Y H:M:S AM/PM
+    curtime = localtime()
+    month = curtime.tm_mon
+    day = curtime.tm_mday
+    year = curtime.tm_year
+    hour = curtime.tm_hour
+    minute = curtime.tm_min
+    second = curtime.tm_sec
+    ampm = 0
+    if hour > 11:
+        hour -= 12
+        ampm = 1
+    curr = [0,0,0,1,1,1]
+    curc = [2,5,11,1,4,7]
+    curvalues = [month, day, year, hour, minute, second]
+    current = 0 # start with month, 0..14
+
+    lcd.clear()
+    lcd.message(strftime("%b %d, %Y  \n%I:%M:%S %p  ", curtime))
+    lcd.blink()
+    lcd.setCursor(curc[current], curr[current])
+    sleep(0.5)
+    while 1:
+        curval = curvalues[current]
+        if lcd.buttonPressed(lcd.UP):
+            curval += 1
+            curvalues[current] = ValidateDateDigit(current, curval)
+            curtime = (curvalues[2], curvalues[0], curvalues[1], curvalues[3], curvalues[4], curvalues[5], 0, 0, 0)
+            lcd.home()
+            lcd.message(strftime("%b %d, %Y  \n%I:%M:%S %p  ", curtime))
+            lcd.setCursor(curc[current], curr[current])
+        if lcd.buttonPressed(lcd.DOWN):
+            curval -= 1
+            curvalues[current] = ValidateDateDigit(current, curval)
+            curtime = (curvalues[2], curvalues[0], curvalues[1], curvalues[3], curvalues[4], curvalues[5], 0, 0, 0)
+            lcd.home()
+            lcd.message(strftime("%b %d, %Y  \n%I:%M:%S %p  ", curtime))
+            lcd.setCursor(curc[current], curr[current])
+        if lcd.buttonPressed(lcd.RIGHT):
+            current += 1
+            if current > 5:
+                current = 5
+            lcd.setCursor(curc[current], curr[current])
+        if lcd.buttonPressed(lcd.LEFT):
+            current -= 1
+            if current < 0:
+                lcd.noBlink()
+                return
+            lcd.setCursor(curc[current], curr[current])
+        if lcd.buttonPressed(lcd.SELECT):
+            # set the date time in the system
+            lcd.noBlink()
+            os.system(strftime('sudo date --set="%d %b %Y %H:%M:%S"', curtime))
+            break
+        sleep(0.25)
+
+    lcd.noBlink()
 
 def ShowIPAddress():
     if DEBUG:
@@ -157,7 +262,8 @@ def SetLocation():
     selector = ListSelector(list, lcd)
     item = selector.Pick()
     # do something useful
-    chosen = list[item]
+    if (item >= 0):
+        chosen = list[item]
 
 def CompassGyroViewAcc():
     if DEBUG:
@@ -405,24 +511,32 @@ ProcessNode(top, uiItems)
 display = Display(uiItems)
 display.display()
 
+if DEBUG:
+	print('start while')
+
 while 1:
 	if (lcd.buttonPressed(lcd.LEFT)):
 		display.update('l')
 		display.display()
+		sleep(0.25)
 
 	if (lcd.buttonPressed(lcd.UP)):
 		display.update('u')
 		display.display()
+		sleep(0.25)
 
 	if (lcd.buttonPressed(lcd.DOWN)):
 		display.update('d')
 		display.display()
+		sleep(0.25)
 
 	if (lcd.buttonPressed(lcd.RIGHT)):
 		display.update('r')
 		display.display()
+		sleep(0.25)
 
 	if (lcd.buttonPressed(lcd.SELECT)):
 		display.update('s')
 		display.display()
+		sleep(0.25)
 

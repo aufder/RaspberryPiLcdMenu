@@ -65,6 +65,10 @@ class ListSelector:
             if self.lcd.buttonPressed(self.lcd.LEFT):
                 if curlen > 1:
                     curlen -= 1
+                else:
+                    sleep(0.5)
+                    curitem = -1
+                    break
                 self.lcd.setCursor(curlen-1,0)
                 self.lcd.blink()
                 sleep(0.5)

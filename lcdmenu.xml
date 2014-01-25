@@ -50,6 +50,7 @@
     <widget text="Time Lapse" function="CameraTimeLapse" />
   </folder>
   <widget text="Quit" function="DoQuit" />
+  <widget text="Reboot" function="DoReboot" />
   <widget text="Shutdown" function="DoShutdown" />
 </application>
 
