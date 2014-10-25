@@ -362,9 +362,10 @@ def GetWord():
             else:
                 curword[curposition] = chr(127)
         if lcd.buttonPressed(lcd.RIGHT):
-            curword.append('A')
-            curposition += 1
-            lcd.setCursor(curposition, 0)
+            if curposition < DISPLAY_COLS - 1:
+                curword.append('A')
+                curposition += 1
+                lcd.setCursor(curposition, 0)
             sleep(0.75)
         if lcd.buttonPressed(lcd.LEFT):
             curposition -= 1
