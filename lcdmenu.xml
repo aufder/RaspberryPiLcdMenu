@@ -24,6 +24,7 @@
       <widget text="Off" function="LcdOff" />
     </folder>
     <run text="Run ls">ls</run>
+    <widget text="Enter a word" function="EnterWord" />
   </folder>
   <folder text="Sensors">
     <folder text="Compass/Gyro">

@@ -9,6 +9,7 @@ import commands
 import os
 from string import split
 from time import sleep, strftime, localtime
+from datetime import datetime, timedelta
 from xml.dom.minidom import *
 from Adafruit_I2C import Adafruit_I2C
 from Adafruit_MCP230xx import Adafruit_MCP230XX
@@ -22,6 +23,9 @@ configfile = 'lcdmenu.xml'
 DEBUG = 0
 DISPLAY_ROWS = 2
 DISPLAY_COLS = 16
+
+# set to 0 if you want the LCD to stay on, 1 to turn off and on auto
+AUTO_OFF_LCD = 0
 
 # set busnum param to the correct value for your pi
 lcd = Adafruit_CharLCDPlate(busnum = 1)
@@ -72,28 +76,44 @@ def DoReboot():
         sleep(0.25)
 
 def LcdOff():
-    lcd.backlight(lcd.OFF)
+    global currentLcd
+    currentLcd = lcd.OFF
+    lcd.backlight(currentLcd)
 
 def LcdOn():
-    lcd.backlight(lcd.ON)
+    global currentLcd
+    currentLcd = lcd.ON
+    lcd.backlight(currentLcd)
 
 def LcdRed():
-    lcd.backlight(lcd.RED)
+    global currentLcd
+    currentLcd = lcd.RED
+    lcd.backlight(currentLcd)
 
 def LcdGreen():
-    lcd.backlight(lcd.GREEN)
+    global currentLcd
+    currentLcd = lcd.GREEN
+    lcd.backlight(currentLcd)
 
 def LcdBlue():
-    lcd.backlight(lcd.BLUE)
+    global currentLcd
+    currentLcd = lcd.BLUE
+    lcd.backlight(currentLcd)
 
 def LcdYellow():
-    lcd.backlight(lcd.YELLOW)
+    global currentLcd
+    currentLcd = lcd.YELLOW
+    lcd.backlight(currentLcd)
 
 def LcdTeal():
-    lcd.backlight(lcd.TEAL)
+    global currentLcd
+    currentLcd = lcd.TEAL
+    lcd.backlight(currentLcd)
 
 def LcdViolet():
-    lcd.backlight(lcd.VIOLET)
+    global currentLcd
+    currentLcd = lcd.VIOLET
+    lcd.backlight(currentLcd)
 
 def ShowDateTime():
     if DEBUG:
@@ -321,6 +341,60 @@ def CameraTimeLapse():
     if DEBUG:
         print('in CameraTimeLapse')
 
+# Get a word from the UI, a character at a time.
+# Click select to complete input, or back out to the left to quit.
+# Return the entered word, or None if they back out.
+def GetWord():
+    lcd.clear()
+    lcd.blink()
+    sleep(0.75)
+    curword = list("A")
+    curposition = 0
+    while 1:
+        if lcd.buttonPressed(lcd.UP):
+            if (ord(curword[curposition]) < 127):
+                curword[curposition] = chr(ord(curword[curposition])+1)
+            else:
+                curword[curposition] = chr(32)
+        if lcd.buttonPressed(lcd.DOWN):
+            if (ord(curword[curposition]) > 32):
+                curword[curposition] = chr(ord(curword[curposition])-1)
+            else:
+                curword[curposition] = chr(127)
+        if lcd.buttonPressed(lcd.RIGHT):
+            curword.append('A')
+            curposition += 1
+            lcd.setCursor(curposition, 0)
+            sleep(0.75)
+        if lcd.buttonPressed(lcd.LEFT):
+            curposition -= 1
+            if curposition <  0:
+                lcd.noBlink()
+                return
+            lcd.setCursor(curposition, 0)
+        if lcd.buttonPressed(lcd.SELECT):
+            # return the word
+            sleep(0.75)
+            return ''.join(curword)
+        lcd.home()
+        lcd.message(''.join(curword))
+        lcd.setCursor(curposition, 0)
+        sleep(0.25)
+
+    lcd.noBlink()
+
+# An example of how to get a word input from the UI, and then
+# do something with it
+def EnterWord():
+    if DEBUG:
+        print('in EnterWord')
+    word = GetWord()
+    lcd.clear()
+    lcd.home()
+    if word is not None:
+        lcd.message('>'+word+'<')
+        sleep(5)
+
 class CommandToRun:
     def __init__(self, myName, theCommand):
         self.text = myName
@@ -356,23 +430,23 @@ class Folder:
 def HandleSettings(node):
     global lcd
     if node.getAttribute('lcdColor').lower() == 'red':
-        lcd.backlight(lcd.RED)
+        LcdRed()
     elif node.getAttribute('lcdColor').lower() == 'green':
-        lcd.backlight(lcd.GREEN)
+        LcdGreen()
     elif node.getAttribute('lcdColor').lower() == 'blue':
-        lcd.backlight(lcd.BLUE)
+        LcdBlue()
     elif node.getAttribute('lcdColor').lower() == 'yellow':
-        lcd.backlight(lcd.YELLOW)
+        LcdYellow()
     elif node.getAttribute('lcdColor').lower() == 'teal':
-        lcd.backlight(lcd.TEAL)
+        LcdTeal()
     elif node.getAttribute('lcdColor').lower() == 'violet':
-        lcd.backlight(lcd.VIOLET)
+        LcdViolet()
     elif node.getAttribute('lcdColor').lower() == 'white':
-        lcd.backlight(lcd.ON)
+        LcdOn()
     if node.getAttribute('lcdBacklight').lower() == 'on':
-        lcd.backlight(lcd.ON)
+        LcdOn()
     elif node.getAttribute('lcdBacklight').lower() == 'off':
-        lcd.backlight(lcd.OFF)
+        LcdOff()
 
 def ProcessNode(currentNode, currentItem):
     children = currentNode.childNodes
@@ -431,6 +505,10 @@ class Display:
         lcd.message(str)
 
     def update(self, command):
+        global currentLcd
+        global lcdstart
+        lcd.backlight(currentLcd)
+        lcdstart = datetime.now()
         if DEBUG:
             print('do',command)
         if command == 'u':
@@ -506,37 +584,45 @@ dom = parse(configfile) # parse an XML file by name
 
 top = dom.documentElement
 
+currentLcd = lcd.OFF
+LcdOff()
 ProcessNode(top, uiItems)
 
 display = Display(uiItems)
 display.display()
 
 if DEBUG:
-	print('start while')
+    print('start while')
 
+lcdstart = datetime.now()
 while 1:
-	if (lcd.buttonPressed(lcd.LEFT)):
-		display.update('l')
-		display.display()
-		sleep(0.25)
+    if (lcd.buttonPressed(lcd.LEFT)):
+       	display.update('l')
+        display.display()
+        sleep(0.25)
 
-	if (lcd.buttonPressed(lcd.UP)):
-		display.update('u')
-		display.display()
-		sleep(0.25)
+    if (lcd.buttonPressed(lcd.UP)):
+        display.update('u')
+        display.display()
+        sleep(0.25)
 
-	if (lcd.buttonPressed(lcd.DOWN)):
-		display.update('d')
-		display.display()
-		sleep(0.25)
+    if (lcd.buttonPressed(lcd.DOWN)):
+        display.update('d')
+        display.display()
+        sleep(0.25)
 
-	if (lcd.buttonPressed(lcd.RIGHT)):
-		display.update('r')
-		display.display()
-		sleep(0.25)
+    if (lcd.buttonPressed(lcd.RIGHT)):
+        display.update('r')
+        display.display()
+        sleep(0.25)
 
-	if (lcd.buttonPressed(lcd.SELECT)):
-		display.update('s')
-		display.display()
-		sleep(0.25)
+    if (lcd.buttonPressed(lcd.SELECT)):
+        display.update('s')
+        display.display()
+        sleep(0.25)
+
+    if AUTO_OFF_LCD:
+        lcdtmp = lcdstart + timedelta(seconds=5)
+        if (datetime.now() > lcdtmp):
+            lcd.backlight(lcd.OFF)
 
