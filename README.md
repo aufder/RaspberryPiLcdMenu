@@ -55,6 +55,7 @@ Changes:
  - Added support to optionally turn LCD light off/on with use.
  - Added support to enter a text phrase into the UI, as a function to
    use as you like.
+
 25-Jan-2014
  - Added support to set date/time
  - Fixed bug to allow backing out of ListSelector
